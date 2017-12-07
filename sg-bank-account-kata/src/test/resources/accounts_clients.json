@@ -1,0 +1,13 @@
+[
+  {
+    "accountId": "123456789",
+    "balance": 10,
+    "operations": [
+      {
+        "wording": "test",
+        "date": 2001,
+        "amount": 10
+      }
+    ]
+  }
+]
