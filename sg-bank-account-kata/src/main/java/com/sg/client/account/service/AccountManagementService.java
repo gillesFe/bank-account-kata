@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.security.auth.login.AccountNotFoundException;
-
 import com.sg.client.account.ClientAccount;
 import com.sg.client.account.ClientAccount.ClientAccountOperations;
 import com.sg.client.account.ClientAccountBuilder;
@@ -16,7 +14,7 @@ import com.sg.client.account.exception.AccountNotDebitedException;
 
 public class AccountManagementService {
 
-    private AccountDao accountDao;
+    private final AccountDao accountDao;
     
     public AccountManagementService() {
         accountDao = new JsonAccountDao();

@@ -1,5 +1,7 @@
 package com.sg.client.account;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ClientAccountBuilder {
@@ -19,7 +21,7 @@ public class ClientAccountBuilder {
 	}
 
 	public List<Operation> getOperations() {
-		return operations;
+		return new ArrayList<>(Collections.unmodifiableCollection(operations));
 	}
 	
 	public ClientAccountBuilder from(ClientAccount clientAccount) {

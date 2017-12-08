@@ -12,7 +12,6 @@ public class Operation {
     private float amount;
 
     public Operation(ClientAccountOperations type, Date date, float amount) {
-        super();
         this.type = type;
         this.date = date;
         this.amount = amount;
