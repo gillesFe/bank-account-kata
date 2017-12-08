@@ -4,16 +4,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 import com.sg.client.account.ClientAccount;
 import com.sg.client.account.ClientAccount.ClientAccountOperations;
 import com.sg.client.account.ClientAccountBuilder;
 import com.sg.client.account.Operation;
 import com.sg.client.account.dao.AccountDao;
 import com.sg.client.account.dao.JsonAccountDao;
+import com.sg.client.account.exception.AccountNotDebitedException;
 
 public class AccountManagementService {
 
-    AccountDao accountDao;
+    private AccountDao accountDao;
     
     public AccountManagementService() {
         accountDao = new JsonAccountDao();
@@ -33,7 +36,7 @@ public class AccountManagementService {
         }
     }
 
-    public void debitAccount(String clientAccountId, float amountToDebit) {
+    public void debitAccount(String clientAccountId, float amountToDebit) throws AccountNotDebitedException {
         Optional<ClientAccount> clientAccount = accountDao.getClientAccountByID(clientAccountId);
 
         float balanceAfterDebit = 0;
@@ -41,7 +44,11 @@ public class AccountManagementService {
             balanceAfterDebit = getBalanceAfterDebit(amountToDebit, clientAccount.get());
         }
 
-        if (clientAccount.isPresent() && isPositiveBalance(balanceAfterDebit)) {
+        if (isNegativeBalance(balanceAfterDebit)) {
+            throw new AccountNotDebitedException("insufficient balance");
+        }
+        
+        if (clientAccount.isPresent()) {
         	getOperations(clientAccount.get()).add(new Operation(ClientAccountOperations.DEBIT, new Date(), amountToDebit));
             accountDao.updateClientAccount(getClientAccountUpdated(clientAccount.get(), balanceAfterDebit));
         }
@@ -64,7 +71,7 @@ public class AccountManagementService {
 		return new ClientAccountBuilder().from(clientAccountFound).withBalance(newBalance).build();
 	}
 
-    private boolean isPositiveBalance(float newBalance) {
-        return newBalance > 0;
+    private boolean isNegativeBalance(float newBalance) {
+        return newBalance < 0;
     }
 }

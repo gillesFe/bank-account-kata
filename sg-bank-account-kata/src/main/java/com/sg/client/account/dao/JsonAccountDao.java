@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
@@ -26,7 +30,7 @@ public class JsonAccountDao implements AccountDao {
 
     public Optional<ClientAccount> getClientAccountByID(final String clientAccountId) {
         try {
-            List<ClientAccount> clientAccounts = mapper.readValue(new File(getClientAccountJsonPath()), new TypeReference<List<ClientAccount>>(){});
+            List<ClientAccount> clientAccounts = deserializeClientAccounts();
             return clientAccounts.stream().filter(currentAccount -> currentAccount.getAccountId().equals(clientAccountId)).findFirst();
         } catch (IOException exception) {
             logger.error(exception.getMessage(), exception);
@@ -34,16 +38,23 @@ public class JsonAccountDao implements AccountDao {
         }
     }
 
-    public void updateClientAccount(ClientAccount clientAccount) {
+    public void updateClientAccount(ClientAccount clientAccountToUpdate) {
         try {
-            List<ClientAccount> clientAccounts = mapper.readValue(new File(getClientAccountJsonPath()), new TypeReference<List<ClientAccount>>(){});
-            clientAccounts.remove(clientAccount);
-            clientAccounts.add(clientAccount);
-            mapper.writeValue(new File(getClientAccountJsonPath()), clientAccounts);
+            List<ClientAccount> clientAccounts = deserializeClientAccounts();
+            Collections.replaceAll(clientAccounts, clientAccountToUpdate, clientAccountToUpdate);
+            serializeClientAccounts(clientAccounts);
         } catch (IOException exception) {
             logger.error(exception.getMessage(), exception);
         }
         
+    }
+
+    private void serializeClientAccounts(List<ClientAccount> clientAccounts) throws IOException, JsonMappingException {
+        mapper.writeValue(new File(getClientAccountJsonPath()), clientAccounts);
+    }
+
+    private List<ClientAccount> deserializeClientAccounts() throws IOException, JsonMappingException {
+        return mapper.readValue(new File(getClientAccountJsonPath()), new TypeReference<List<ClientAccount>>(){});
     }
 
     private String getClientAccountJsonPath () {
